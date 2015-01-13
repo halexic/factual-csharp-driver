@@ -25,6 +25,7 @@ namespace FactualDriver
         public int? ConnectionTimeout { get; set; }
         public int? ReadTimeout { get; set; }
         public string FactualApiUrlOverride { get; set; }
+        public string ProxyUrlOverride { get; set; }
 
         /// <summary>
         /// MultiQuery accessor. Creates and returns new instance of MultiQuery if one already doesn't exists.
@@ -71,7 +72,15 @@ namespace FactualDriver
         {
             string factualApiUrl = string.IsNullOrEmpty(FactualApiUrlOverride) ? "http://api.v3.factual.com" : FactualApiUrlOverride;
             var requestUrl = new Uri(new Uri(factualApiUrl), query);
-            var request = _factualAuthenticator.CreateHttpWebRequest(httpMethod, requestUrl);
+
+            HttpWebRequest request;
+            if (String.IsNullOrEmpty(ProxyUrlOverride)) {
+                request = _factualAuthenticator.CreateHttpWebRequest(httpMethod, requestUrl);
+            } else {
+                var proxyUrl = new Uri(new Uri(ProxyUrlOverride), query);
+                request = _factualAuthenticator.CreateHttpWebRequest(httpMethod, requestUrl, proxyUrl);
+            }
+
             request.Headers.Add("X-Factual-Lib", DriverHeaderTag);
             request.Timeout = ConnectionTimeout ?? 100000;
             request.ReadWriteTimeout = ReadTimeout ?? 300000;

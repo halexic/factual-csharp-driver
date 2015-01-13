@@ -41,5 +41,14 @@ namespace FactualDriver.OAuth
             ApplyAuthenticationToRequest(request);
             return request;
         }
+
+        public HttpWebRequest CreateHttpWebRequest(string httpMethod, Uri targetUri, Uri proxyUri)
+        {
+            HttpWebRequest request = WebRequest.Create(proxyUri) as HttpWebRequest;
+            request.AllowAutoRedirect = false;
+            request.Method = httpMethod; 
+            request.Headers.Add(OAuthUtil.GenerateHeader(targetUri, _constumerKey, _constumerSecret, null, null, request.Method));
+            return request;
+        }
     }
 }
